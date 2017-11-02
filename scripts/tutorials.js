@@ -17,6 +17,7 @@ $(document).ready( function() {
   var tutorialIndexToPageObject = {}; //{0:{page:2,totalPageNum:5}}
 
   var setupTutorialHeader = function(tutorialIndex) {
+    console.log('setting up ')
     var tutorialPageObject = tutorialIndexToPageObject[tutorialIndex];
     var tutorialContainer = getTutorialContainer(tutorialIndex);
     var tutorialNavigationHeader = tutorialContainer.getElementsByClassName("tutorialNavigationHeader")[0];
@@ -180,10 +181,70 @@ $(document).ready( function() {
     return false;
   });
 
+var makeTutorialChange = function(tutorialIndex) {
+    var tutorialContainer = getTutorialContainer(tutorialIndex);
+    var tutorialContentPages = tutorialContainer.getElementsByClassName("tutorialContentPage");
+    console.log(tutorialContainer);
+    console.log(tutorialContentPages);
+
+    // for(var i=0;i<tutorialContentPages.length;i++) {
+    //   tutorialContentPages[i].style.display = "none";
+    // }
+    var currentPage = tutorialContentPages[tutorialIndexToPageObject[tutorialIndex].page];
+    console.log(currentPage.style);
+    currentPage.style.backgroundColor = "pink"
+    // currentPage.style.display = "block";
+    
+    // updateTutorialHeader(tutorialIndex)
+  }
+
 // Add tutorial video pop-out
 window.getTutorialVideo = function(tutorialId) {
   window.parent.postMessage({type:"video", youtubeId:tutorialId}, '*');
 }
+
+// Add text box pop-out
+window.getTextBox = function(inputText) {
+  window.parent.postMessage({type:"text", textMessage:inputText}, '*');
+}
+
+var findAllComponents = function(components) {
+  for (i in components) {
+    result.push(components[i]["$Type"]);
+    if ("$Components" in components[i]) {
+      findAllComponents(components[i]["$Components"]);
+    } 
+  }
+}
+
+var checkForComponent = function(target, components) {
+  var result = [];
+  findAllComponents(components)
+  if (target in result) {
+    console.log("found target")
+    return true;
+  }
+}
+
+window.recieveMessage=function(event){
+  if (event.data.type == "designer") {
+    start = event.data.info.indexOf("$JSON")+5;
+    end = event.data.info.indexOf("|#");
+    data = event.data.info.substring(start,end);
+    data = JSON.parse(data);
+    components = data["Properties"]["$Components"]
+    // checkForComponent("Button", components);
+    // for (i = 0; i < components.length; i++) { 
+    //     if (components[i]["$Type"] == "Button") {
+    //       makeTutorialChange(0);
+    //     }   
+    // }
+  };
+  if (event.data.type == "blocks") {
+    // console.log('block components')
+  };
+};
+window.addEventListener("message", window.recieveMessage, false);
 
   // Add image enlargement
   var allTutPics = document.getElementsByClassName('enlargeImage');
